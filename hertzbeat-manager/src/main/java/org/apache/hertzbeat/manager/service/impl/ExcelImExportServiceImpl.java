@@ -17,21 +17,25 @@
 
 package org.apache.hertzbeat.manager.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
 import static org.apache.hertzbeat.common.constants.ExportFileConstants.ExcelFile.FILE_SUFFIX;
 import static org.apache.hertzbeat.common.constants.ExportFileConstants.ExcelFile.TYPE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hertzbeat.common.entity.manager.Tag;
+import org.apache.hertzbeat.common.util.JsonUtil;
 import org.apache.hertzbeat.common.util.export.ExcelExportUtils;
+import org.apache.hertzbeat.manager.dao.TagDao;
+import org.apache.hertzbeat.manager.service.TagService;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -42,7 +46,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.RegionUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Configure the import and export EXCEL format
@@ -51,6 +57,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
+
+    @Autowired
+    private TagService tagService;
+
+    @Autowired
+    private TagDao tagDao;
 
     /**
      * Export file type
@@ -91,15 +103,15 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
                 if (StringUtils.isNotBlank(name)) {
                     startRowList.add(row.getRowNum());
                     MonitorDTO monitor = extractMonitorDataFromRow(row);
+                    String metrics = getCellValueAsString(row.getCell(11));
+                    boolean detected = getCellValueAsBoolean(row.getCell(12));
                     ExportMonitorDTO exportMonitor = new ExportMonitorDTO();
                     exportMonitor.setMonitor(monitor);
                     monitors.add(exportMonitor);
-                    String metrics = getCellValueAsString(row.getCell(11));
                     if (StringUtils.isNotBlank(metrics)) {
                         List<String> metricList = Arrays.stream(metrics.split(",")).collect(Collectors.toList());
                         exportMonitor.setMetrics(metricList);
                     }
-                    boolean detected = getCellValueAsBoolean(row.getCell(12));
                     exportMonitor.setDetected(detected);
                 }
             }
@@ -133,6 +145,7 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
         }
     }
 
+    @Transactional
     private MonitorDTO extractMonitorDataFromRow(Row row) {
         MonitorDTO monitor = new MonitorDTO();
 
@@ -145,15 +158,58 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
 
         String tagsString = getCellValueAsString(row.getCell(6));
         if (StringUtils.isNotBlank(tagsString)) {
-            List<Long> tags = Arrays.stream(tagsString.split(","))
-                    .map(Long::parseLong)
-                    .collect(Collectors.toList());
-            monitor.setTags(tags);
+            try {
+                List<Tag> parsedTags = parseTagString(tagsString);
+                monitor.setTagBindings(parsedTags); // 新增临时字段
+                tagService.addTags(parsedTags);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("标签格式错误: " + e.getMessage());
+            }
         }
         monitor.setCollector(getCellValueAsString(row.getCell(7)));
 
 
         return monitor;
+    }
+
+    private List<Tag> parseTagString(String input) {
+        try {
+            // 1. 预处理输入格式
+            String normalized = input.trim();
+
+            // 使用项目JSON工具校验格式
+            if (!JsonUtil.isJsonStr(normalized)) {
+                // 自动修复常见格式问题
+                normalized = normalized
+                        .replaceAll("}\\s*,\\s*\\{", "},{")  // 修复对象分隔符
+                        .replaceAll("'", "\"")                 // 替换单引号
+                        .replaceAll("(\\w+):", "\"$1\":");     // 自动补全属性引号
+            }
+            // 包裹为数组格式
+            if (!normalized.startsWith("[")) {
+                normalized = "[" + normalized + "]";
+            }
+            // 2. 使用项目JSON工具解析
+            List<Tag> tags = JsonUtil.fromJson(normalized, new TypeReference<>() {
+            });
+
+            // 3. 校验必要字段
+            if (tags == null) {
+                throw new IllegalArgumentException("Invalid tag format");
+            }
+            tags.forEach(tag -> {
+                if (StringUtils.isBlank(tag.getName())) {
+                    throw new IllegalArgumentException("Tag name cannot be empty");
+                }
+                if (tag.getTagValue() == null) {
+                    tag.setTagValue(""); // 保证非null
+                }
+            });
+
+            return tags;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("标签解析失败: " + e.getMessage());
+        }
     }
 
     private ParamDTO extractParamDataFromRow(Row row) {
@@ -174,7 +230,15 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
         }
         return switch (cell.getCellType()) {
             case STRING -> cell.getStringCellValue();
-            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case NUMERIC -> {
+                double value = cell.getNumericCellValue();
+                String s = String.valueOf(value);
+                // 移除末尾的 .0
+                if (s.endsWith(".0")) {
+                    s = s.substring(0, s.length() - 2);
+                }
+                yield s;
+            }
             default -> null;
         };
     }
@@ -256,8 +320,21 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
                         Cell descriptionCell = row.createCell(5);
                         descriptionCell.setCellValue(monitorDTO.getDescription());
                         descriptionCell.setCellStyle(cellStyle);
+                        // 修改 writeOs 方法中的标签导出部分：
                         Cell tagsCell = row.createCell(6);
-                        tagsCell.setCellValue(monitorDTO.getTags().stream().map(Object::toString).collect(Collectors.joining(",")));
+                        String tagDisplay = monitorDTO.getTags()
+                                                      .stream()
+                                                      .map(tagId -> {
+                                                          Tag tag = tagDao.findById(tagId)
+                                                                          .orElse(null);
+                                                          return tag != null ?
+                                                                  String.format("{\"name\":\"%s\",\"tagValue\":\"%s\"}",
+                                                                                tag.getName(), tag.getTagValue())
+                                                                  : "";
+                                                      })
+                                                      .filter(StringUtils::isNotBlank)
+                                                      .collect(Collectors.joining(","));
+                        tagsCell.setCellValue(tagDisplay);
                         tagsCell.setCellStyle(cellStyle);
                         Cell collectorCell = row.createCell(7);
                         collectorCell.setCellValue(monitorDTO.getCollector());

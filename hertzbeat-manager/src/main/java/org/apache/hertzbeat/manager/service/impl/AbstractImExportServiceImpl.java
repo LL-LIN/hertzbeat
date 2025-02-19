@@ -15,20 +15,15 @@
 
 package org.apache.hertzbeat.manager.service.impl;
 
-import cn.afterturn.easypoi.excel.annotation.Excel;
-import cn.afterturn.easypoi.excel.annotation.ExcelCollection;
-import cn.afterturn.easypoi.excel.annotation.ExcelEntity;
-import cn.afterturn.easypoi.excel.annotation.ExcelTarget;
+import cn.afterturn.easypoi.excel.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Resource;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +37,7 @@ import org.apache.hertzbeat.manager.service.MonitorService;
 import org.apache.hertzbeat.manager.service.TagService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.annotation.Transient;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -108,6 +104,8 @@ public abstract class AbstractImExportServiceImpl implements ImExportService {
             monitor.setTags(dto.getMonitor().getTags().stream()
                     .map(Tag::getId).toList());
         }
+        // 新增标签绑定数据（用于导出）
+        monitor.setTagBindings(dto.getMonitor().getTags());
         exportMonitor.setMonitor(monitor);
         exportMonitor.setParams(dto.getParams().stream()
                 .map(it -> {
@@ -135,14 +133,17 @@ public abstract class AbstractImExportServiceImpl implements ImExportService {
         log.debug("exportMonitor.monitor{}", exportMonitor.monitor);
         if (exportMonitor.monitor != null) { // Add one more null check
             BeanUtils.copyProperties(exportMonitor.monitor, monitor);
-            if (exportMonitor.monitor.tags != null && !exportMonitor.monitor.tags.isEmpty()) {
-                monitor.setTags(tagService.listTag(new HashSet<>(exportMonitor.monitor.tags))
-                        .stream()
-                        .filter(tag -> !(tag.getName().equals(CommonConstants.TAG_MONITOR_ID) || tag.getName().equals(CommonConstants.TAG_MONITOR_NAME)))
-                        .collect(Collectors.toList()));
-            } else {
-                monitor.setTags(Collections.emptyList());
+
+            // 优先使用tagBindings数据
+            List<Tag> tags = exportMonitor.monitor.getTagBindings();
+            if (CollectionUtils.isEmpty(tags)) {
+                // 回退到原有标签ID处理
+                tags = tagService.listTag(new HashSet<>(exportMonitor.monitor.tags))
+                                 .stream()
+                                 .filter(tag -> !(tag.getName().equals(CommonConstants.TAG_MONITOR_ID) || tag.getName().equals(CommonConstants.TAG_MONITOR_NAME)))
+                                 .collect(Collectors.toList());
             }
+            monitor.setTags(tags);
         }
         monitorDto.setMonitor(monitor);
         if (exportMonitor.getMonitor() != null) {
@@ -205,6 +206,11 @@ public abstract class AbstractImExportServiceImpl implements ImExportService {
         private List<Long> tags;
         @Excel(name = "Collector")
         private String collector;
+        // 新增临时字段用于标签绑定处理
+        @Transient
+        @JsonIgnore
+        @ExcelIgnore
+        private List<Tag> tagBindings = new ArrayList<>();
     }
 
     @Data
