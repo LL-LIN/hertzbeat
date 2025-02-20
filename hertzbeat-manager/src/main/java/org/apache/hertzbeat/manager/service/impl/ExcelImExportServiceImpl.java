@@ -25,7 +25,10 @@ import static org.apache.hertzbeat.common.constants.ExportFileConstants.ExcelFil
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -327,7 +330,8 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
                                                       .map(tagId -> {
                                                           Tag tag = tagDao.findById(tagId)
                                                                           .orElse(null);
-                                                          return tag != null ?
+                                                          return tag != null
+                                                                  ?
                                                                   String.format("{\"name\":\"%s\",\"tagValue\":\"%s\"}",
                                                                                 tag.getName(), tag.getTagValue())
                                                                   : "";

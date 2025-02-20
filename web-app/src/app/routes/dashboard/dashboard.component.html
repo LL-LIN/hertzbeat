@@ -19,7 +19,7 @@
 
 <div class="mobile-hide">
   <ngx-slick-carousel style="margin-top: 70px" nz-row class="carousel" [config]="slideConfig">
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountService.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -31,19 +31,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountService.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountService.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountService.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountService.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountService.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountService.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountProgram.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -55,19 +58,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountProgram.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountProgram.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountProgram.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountProgram.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountProgram.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountProgram.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountDb.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -79,19 +85,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountDb.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountDb.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountDb.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountDb.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountDb.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountDb.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountCache.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -103,19 +112,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountCache.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCache.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountCache.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCache.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountCache.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCache.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountOs.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -127,19 +139,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountOs.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountOs.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountOs.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountOs.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountOs.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountOs.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountMid.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -151,19 +166,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountMid.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountMid.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountMid.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountMid.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountMid.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountMid.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountBigdata.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -175,19 +193,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountBigdata.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountBigdata.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountBigdata.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountBigdata.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountBigdata.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountBigdata.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountWebserver.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -199,21 +220,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountWebserver.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountWebserver.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span
-              ><span style="font-weight: bolder">{{ appCountWebserver.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountWebserver.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span
-              ><span style="font-weight: bolder">{{ appCountWebserver.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountWebserver.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountCn.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -225,19 +247,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountCn.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCn.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountCn.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCn.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountCn.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCn.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountNetwork.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -249,19 +274,22 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountNetwork.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountNetwork.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountNetwork.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountNetwork.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountNetwork.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountNetwork.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
       </div>
     </div>
-    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide">
+    <div style="width: 25%; margin: 3px" ngxSlickItem class="slide" *ngIf="appCountCustom.size > 0">
       <div class="mb-md hoverCard">
         <div nz-row nzAlign="middle" class="bg-primary rounded-lg">
           <div nz-col nzSpan="9" class="p-md text-white">
@@ -273,13 +301,16 @@
           </div>
           <div nz-col nzSpan="15">
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{ appCountCustom.availableSize }}</span>
+              <span>{{ 'monitor.status.up' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCustom.availableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{ appCountCustom.unAvailableSize }}</span>
+              <span>{{ 'monitor.status.down' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCustom.unAvailableSize }}</span>
             </nz-tag>
             <nz-tag class="mb-xs">
-              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{ appCountCustom.unManageSize }}</span>
+              <span>{{ 'monitor.status.paused' | i18n }} </span><span style="font-weight: bolder">{{
+                appCountCustom.unManageSize }}</span>
             </nz-tag>
           </div>
         </div>
@@ -291,49 +322,26 @@
 <div nz-row nzGutter="16" style="margin-top: 25px; height: 400px">
   <div nz-col [nzXs]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzMd]="{ span: 6 }" style="height: 100%">
     <nz-spin [nzSpinning]="wordCloudDataLoading">
-      <angular-tag-cloud
-        class="br-4"
-        *ngIf="!wordCloudDataLoading"
-        (clicked)="onTagCloudClick($event)"
-        [font]="'italic bold 6px monospace'"
-        [data]="wordCloudData"
-        [width]="1"
-        [height]="1"
-        [step]="2"
-        [strict]="true"
-        [randomizeAngle]="true"
-        [realignOnResize]="true"
-        [delay]="300"
-        [zoomOnHover]="{ scale: 1.4, transitionTime: 0.6, delay: 0.4 }"
-        [overflow]="false"
-        [background]="'white no-repeat fixed center'"
-      >
+      <angular-tag-cloud class="br-4" *ngIf="!wordCloudDataLoading" (clicked)="onTagCloudClick($event)"
+        [font]="'italic bold 6px monospace'" [data]="wordCloudData" [width]="1" [height]="1" [step]="2" [strict]="true"
+        [randomizeAngle]="true" [realignOnResize]="true" [delay]="300"
+        [zoomOnHover]="{ scale: 1.4, transitionTime: 0.6, delay: 0.4 }" [overflow]="false"
+        [background]="'white no-repeat fixed center'">
       </angular-tag-cloud>
     </nz-spin>
   </div>
   <div nz-col [nzXs]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzMd]="{ span: 12 }" style="height: 100%">
     <nz-spin [nzSpinning]="appsCountLoading">
-      <div
-        echarts
-        [options]="appsCountEChartOption"
-        theme="default"
-        [autoResize]="true"
-        [loading]="appsCountLoading"
-        (chartClick)="onChartClick($event)"
-        (chartInit)="onAppsCountChartInit($event)"
-        style="width: 100%; height: inherit"
-      ></div>
+      <div echarts [options]="appsCountEChartOption" theme="default" [autoResize]="true" [loading]="appsCountLoading"
+        (chartClick)="onChartClick($event)" (chartInit)="onAppsCountChartInit($event)"
+        style="width: 100%; height: inherit"></div>
     </nz-spin>
   </div>
   <div nz-col [nzXs]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzMd]="{ span: 6 }" style="height: 100%">
     <nz-spin [nzSpinning]="collectorsLoading">
       <div style="overflow-y: auto; height: inherit">
-        <nz-card
-          *ngFor="let item of collectors; let i = index"
-          class="rounded-lg collectors"
-          nzBordered="false"
-          [nzTitle]="collectorCardTitle"
-        >
+        <nz-card *ngFor="let item of collectors; let i = index" class="rounded-lg collectors" nzBordered="false"
+          [nzTitle]="collectorCardTitle">
           <ng-template #collectorCardTitle>
             <span style="font-size: medium; font-weight: bold" nz-tooltip [nzTooltipTitle]="item.collector.name">
               <span nz-icon nzType="bug" nzTheme="outline" style="margin-right: 4px"></span>
@@ -351,8 +359,10 @@
           </nz-card-tab>
           <ng-container *ngIf="collectorsTabSelectedIndex === 0">
             <div class="rounded-lg" style="text-align: center; width: 100%; background-color: #8fccca; padding: 2%">
-              <span [style]="'font-size: x-large; font-weight: bolder;' + (item.collector.status == 0 ? 'color: green' : 'color: red')">
-                {{ item.collector.status == 0 ? ('monitor.collector.status.online' | i18n) : ('monitor.collector.status.offline' | i18n) }}
+              <span
+                [style]="'font-size: x-large; font-weight: bolder;' + (item.collector.status == 0 ? 'color: green' : 'color: red')">
+                {{ item.collector.status == 0 ? ('monitor.collector.status.online' | i18n) :
+                ('monitor.collector.status.offline' | i18n) }}
               </span>
             </div>
           </ng-container>
@@ -362,17 +372,17 @@
                 {{ item.pinMonitorNum + item.dispatchMonitorNum }}
               </span>
               <br />
-              <nz-tag style="margin-bottom: 4%; font-weight: bolder">{{ 'collector.pinned' | i18n }}: {{ item.pinMonitorNum }}</nz-tag>
-              <nz-tag style="margin-bottom: 4%; font-weight: bolder"
-                >{{ 'collector.dispatched' | i18n }}: {{ item.dispatchMonitorNum }}</nz-tag
-              >
+              <nz-tag style="margin-bottom: 4%; font-weight: bolder">{{ 'collector.pinned' | i18n }}: {{
+                item.pinMonitorNum }}</nz-tag>
+              <nz-tag style="margin-bottom: 4%; font-weight: bolder">{{ 'collector.dispatched' | i18n }}: {{
+                item.dispatchMonitorNum }}</nz-tag>
             </div>
           </ng-container>
           <ng-container *ngIf="collectorsTabSelectedIndex === 2">
             <div class="rounded-lg" style="text-align: center; width: 100%; background-color: #8fccca; padding: 2%">
               <span style="font-size: x-large; font-weight: bolder; color: white">{{
                 (item.collector.gmtUpdate | date : 'YYYY-MM-dd HH:mm:ss')?.trim()
-              }}</span>
+                }}</span>
             </div>
           </ng-container>
           <ng-container *ngIf="collectorsTabSelectedIndex === 3">
@@ -392,14 +402,14 @@
 </div>
 
 <div nz-row nzGutter="16" style="margin-top: 25px; height: 320px">
-  <div nz-col [nzXs]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzMd]="{ span: 15 }" class="mb-md timeline-card" style="height: 100%">
+  <div nz-col [nzXs]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzMd]="{ span: 15 }" class="mb-md timeline-card"
+    style="height: 100%">
     <nz-spin [nzSpinning]="alertContentLoading">
-      <nz-card nzHoverable [nzTitle]="alertCardTitleTemplate" [nzExtra]="extraTemplate" style="height: inherit; overflow: hidden">
+      <nz-card nzHoverable [nzTitle]="alertCardTitleTemplate" [nzExtra]="extraTemplate"
+        style="height: inherit; overflow: hidden">
         <nz-timeline nzMode="left">
-          <nz-timeline-item
-            *ngFor="let alert of alerts; let i = index"
-            [nzLabel]="(alert.lastAlarmTime | date : 'YYYY-MM-dd HH:mm:ss')?.trim()"
-          >
+          <nz-timeline-item *ngFor="let alert of alerts; let i = index"
+            [nzLabel]="(alert.lastAlarmTime | date : 'YYYY-MM-dd HH:mm:ss')?.trim()">
             <p style="font-weight: 400">
               <nz-tag *ngIf="alert.priority == 0" nzColor="red">
                 <i nz-icon nzType="bell" nzTheme="outline"></i>
@@ -423,16 +433,9 @@
   </div>
   <div nz-col [nzXs]="{ span: 24 }" [nzSm]="{ span: 12 }" [nzMd]="{ span: 9 }" class="mb-md" style="height: 100%">
     <nz-spin [nzSpinning]="alertsLoading">
-      <div
-        echarts
-        [options]="alertsEChartOption"
-        theme="default"
-        [autoResize]="true"
-        [loading]="alertsLoading"
-        (chartInit)="onAlertNumChartInit($event)"
-        style="width: 100%; height: inherit; padding-left: 30px"
-        class="ant-card ant-card-bordered ant-card-hoverable"
-      ></div>
+      <div echarts [options]="alertsEChartOption" theme="default" [autoResize]="true" [loading]="alertsLoading"
+        (chartInit)="onAlertNumChartInit($event)" style="width: 100%; height: inherit; padding-left: 30px"
+        class="ant-card ant-card-bordered ant-card-hoverable"></div>
     </nz-spin>
   </div>
 </div>
