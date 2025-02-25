@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -149,7 +150,7 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
     }
 
     @Transactional
-    private MonitorDTO extractMonitorDataFromRow(Row row) {
+    public MonitorDTO extractMonitorDataFromRow(Row row) {
         MonitorDTO monitor = new MonitorDTO();
 
         monitor.setName(getCellValueAsString(row.getCell(0)));
@@ -161,13 +162,40 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
 
         String tagsString = getCellValueAsString(row.getCell(6));
         if (StringUtils.isNotBlank(tagsString)) {
+            List<Tag> parsedTags;
             try {
-                List<Tag> parsedTags = parseTagString(tagsString);
-                monitor.setTagBindings(parsedTags); // 新增临时字段
-                tagService.addTags(parsedTags);
+                // 解析标签字符串并去重
+                parsedTags = parseTagString(tagsString).stream()
+                                                       .distinct()
+                                                       .toList();
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("标签格式错误: " + e.getMessage());
             }
+            List<Tag> existingTags = new ArrayList<>();
+            List<Tag> newTags = new ArrayList<>();
+            // 分离已存在和新增的标签
+            for (Tag tag : parsedTags) {
+                Optional<Tag> existingTagOpt = tagDao.findTagByNameAndTagValue(tag.getName(), tag.getTagValue());
+                if (existingTagOpt.isPresent()) {
+                    existingTags.add(existingTagOpt.get());
+                } else {
+                    // 设置新标签的类型和ID
+                    tag.setType((byte) 1);
+                    tag.setId(null);
+                    newTags.add(tag);
+                }
+            }
+            // 批量保存新标签
+            if (!newTags.isEmpty()) {
+                try {
+                    List<Tag> savedTags = tagDao.saveAll(newTags);
+                    existingTags.addAll(savedTags);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("保存标签失败: " + e.getMessage(), e);
+                }
+            }
+            // 设置合并后的标签到Monitor
+            monitor.setTagBindings(existingTags);
         }
         monitor.setCollector(getCellValueAsString(row.getCell(7)));
 
