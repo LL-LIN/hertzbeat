@@ -38,6 +38,9 @@ public class CacheIdentifier {
     
     private String customArg;
 
+    private String proxyHost;
+    private String proxyPort;
+
     @Override
     public String toString() {
         return "CacheIdentifier {"

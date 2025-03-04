@@ -52,6 +52,7 @@ import org.apache.hertzbeat.common.util.CommonUtil;
 import org.apache.sshd.client.SshClient;
 import org.apache.sshd.client.channel.ClientChannel;
 import org.apache.sshd.client.channel.ClientChannelEvent;
+import org.apache.sshd.client.config.hosts.HostConfigEntry;
 import org.apache.sshd.client.session.ClientSession;
 import org.apache.sshd.common.SshException;
 import org.apache.sshd.common.channel.exception.SshChannelOpenException;
@@ -72,7 +73,7 @@ public class SshCollectImpl extends AbstractCollect {
 
     private static final int DEFAULT_TIMEOUT = 10_000;
     private final ConnectionCommonCache<CacheIdentifier, SshConnect> connectionCommonCache;
-    
+
     public SshCollectImpl() {
         connectionCommonCache = new ConnectionCommonCache<>();
     }
@@ -90,11 +91,12 @@ public class SshCollectImpl extends AbstractCollect {
         long startTime = System.currentTimeMillis();
         SshProtocol sshProtocol = metrics.getSsh();
         boolean reuseConnection = Boolean.parseBoolean(sshProtocol.getReuseConnection());
+        boolean useProxy = Boolean.parseBoolean(sshProtocol.getUseProxy());
         int timeout = CollectUtil.getTimeout(sshProtocol.getTimeout(), DEFAULT_TIMEOUT);
         ClientChannel channel = null;
         ClientSession clientSession = null;
         try {
-            clientSession = getConnectSession(sshProtocol, timeout, reuseConnection);
+            clientSession = getConnectSession(sshProtocol, timeout, reuseConnection, useProxy);
             if (CommonSshBlacklist.isCommandBlacklisted(sshProtocol.getScript())) {
                 builder.setCode(CollectRep.Code.FAIL);
                 builder.setMsg("The command is blacklisted: " + sshProtocol.getScript());
@@ -291,12 +293,24 @@ public class SshCollectImpl extends AbstractCollect {
         connectionCommonCache.removeCache(identifier);
     }
 
-    private ClientSession getConnectSession(SshProtocol sshProtocol, int timeout, boolean reuseConnection)
+    private ClientSession getConnectSession(SshProtocol sshProtocol, int timeout, boolean reuseConnection, boolean useProxy)
             throws IOException, GeneralSecurityException {
+        // 明确捕获目标主机信息（防止后续修改影响）
+        final String targetHost = sshProtocol.getHost(); // 10.191.4.175
+        final int targetPort = Integer.parseInt(sshProtocol.getPort());
+        final String proxyHost = sshProtocol.getProxyHost(); // 172.24.4.68
+        final String proxyUser = sshProtocol.getProxyUsername();
+        final int proxyPort = Integer.parseInt(sshProtocol.getProxyPort());
+
+        // 增强缓存键：包含代理配置信息
         CacheIdentifier identifier = CacheIdentifier.builder()
-                .ip(sshProtocol.getHost()).port(sshProtocol.getPort())
-                .username(sshProtocol.getUsername()).password(sshProtocol.getPassword())
-                .build();
+                                                    .ip(targetHost)
+                                                    .port(String.valueOf(targetPort))
+                                                    .username(sshProtocol.getUsername())
+                                                    .password(sshProtocol.getPassword())
+                                                    .proxyHost(proxyHost)  // 新增代理信息
+                                                    .proxyPort(String.valueOf(proxyPort))
+                                                    .build();
         ClientSession clientSession = null;
         if (reuseConnection) {
             Optional<SshConnect> cacheOption = connectionCommonCache.getCache(identifier, true);
@@ -318,25 +332,56 @@ public class SshCollectImpl extends AbstractCollect {
             }
         }
         SshClient sshClient = CommonSshClient.getSshClient();
-        clientSession = sshClient.connect(sshProtocol.getUsername(), sshProtocol.getHost(), Integer.parseInt(sshProtocol.getPort()))
-                .verify(timeout, TimeUnit.MILLISECONDS).getSession();
-        if (StringUtils.hasText(sshProtocol.getPassword())) {
-            clientSession.addPasswordIdentity(sshProtocol.getPassword());
-        } else if (StringUtils.hasText(sshProtocol.getPrivateKey())) {
-            var resourceKey = PrivateKeyUtils.writePrivateKey(sshProtocol.getHost(), sshProtocol.getPrivateKey());
-            SecurityUtils.loadKeyPairIdentities(null, () -> resourceKey, new FileInputStream(resourceKey), null)
-                    .forEach(clientSession::addPublicKeyIdentity);
-        }  // else auth with localhost private public key certificates
+        HostConfigEntry proxyConfig = new HostConfigEntry();
+        if (useProxy && StringUtils.hasText(proxyHost)) {
+            String proxySpec = String.format("%s@%s:%d", proxyUser, proxyHost, proxyPort);
+            proxyConfig.setHostName(targetHost);
+            proxyConfig.setHost(targetHost);
+            proxyConfig.setPort(targetPort);
+            proxyConfig.setUsername(sshProtocol.getUsername());
+            proxyConfig.setProxyJump(proxySpec);
+            if (StringUtils.hasText(sshProtocol.getProxyPassword())) {
+                sshClient.addPasswordIdentity(sshProtocol.getProxyPassword());
+                log.debug("已加载代理服务器密码认证: {}@{}", proxyUser, proxyHost);
+            }
+        }
+        try {
+            if (useProxy && StringUtils.hasText(proxyHost)) {
+                clientSession = sshClient.connect(proxyConfig)
+                                         .verify(timeout, TimeUnit.MILLISECONDS)
+                                         .getSession();
+            } else {
+                // 显式传递目标主机参数（防御性编程）
+                clientSession = sshClient.connect(sshProtocol.getUsername(), targetHost, targetPort)
+                                         .verify(timeout, TimeUnit.MILLISECONDS)
+                                         .getSession();
+            }
+            // 认证逻辑（同时处理代理和目标主机的凭据）
+            if (StringUtils.hasText(sshProtocol.getPassword())) {
+                clientSession.addPasswordIdentity(sshProtocol.getPassword());
+                log.debug("添加目标服务器密码认证");
+            } else if (StringUtils.hasText(sshProtocol.getPrivateKey())) {
+                var resourceKey = PrivateKeyUtils.writePrivateKey(sshProtocol.getHost(), sshProtocol.getPrivateKey());
+                SecurityUtils.loadKeyPairIdentities(null, () -> resourceKey, new FileInputStream(resourceKey), null)
+                        .forEach(clientSession::addPublicKeyIdentity);
+            }  // else auth with localhost private public key certificates
 
-        // auth
-        if (!clientSession.auth().verify(timeout, TimeUnit.MILLISECONDS).isSuccess()) {
-            clientSession.close();
-            throw new IllegalArgumentException("ssh auth failed.");
+            // auth
+            if (!clientSession.auth().verify(timeout, TimeUnit.MILLISECONDS).isSuccess()) {
+                clientSession.close();
+                throw new IllegalArgumentException("ssh auth failed.");
+            }
+            if (reuseConnection) {
+                SshConnect sshConnect = new SshConnect(clientSession);
+                connectionCommonCache.addCache(identifier, sshConnect);
+            }
+            return clientSession;
+        } catch (IOException e) {
+            // 增强错误信息
+            log.debug("连接{}:{}失败（经过代理：{}）", targetHost, targetPort, proxyHost, e);
+            throw new SshException(String.format("连接%s:%d失败（经过代理：%s）",
+                                                 targetHost, targetPort, proxyHost), e);
+
         }
-        if (reuseConnection) {
-            SshConnect sshConnect = new SshConnect(clientSession);
-            connectionCommonCache.addCache(identifier, sshConnect);
-        }
-        return clientSession;
     }
 }

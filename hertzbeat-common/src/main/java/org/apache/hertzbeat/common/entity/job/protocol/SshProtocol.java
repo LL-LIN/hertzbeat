@@ -75,4 +75,14 @@ public class SshProtocol {
      * Response data parsing mode：oneRow, multiRow
      */
     private String parseType;
+
+    private String proxyHost;
+
+    private String proxyPort;
+
+    private String proxyUsername;
+
+    private String proxyPassword;
+
+    private String useProxy;
 }
