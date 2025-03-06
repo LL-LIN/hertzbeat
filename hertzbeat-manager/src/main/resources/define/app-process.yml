@@ -82,6 +82,17 @@ params:
     required: true
     defaultValue: true
   # field-param field key
+  - field: useProxy
+    # name-param field display i18n name
+    name:
+      zh-CN: 使用代理
+      en-US: Use Proxy Connection
+    # type-param field type(most mapping the html input type)
+    type: boolean
+    # required-true or false
+    required: true
+    defaultValue: false
+  # field-param field key
   - field: username
     # name-param field display i18n name
     name:
