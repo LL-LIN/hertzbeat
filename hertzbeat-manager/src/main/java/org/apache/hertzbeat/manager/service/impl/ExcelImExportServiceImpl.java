@@ -63,9 +63,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
 
     @Autowired
-    private TagService tagService;
-
-    @Autowired
     private TagDao tagDao;
 
     /**
@@ -315,7 +312,7 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
 
             Workbook workbook = WorkbookFactory.create(true);
             String sheetName = "Export Monitor";
-            Sheet sheet = ExcelExportUtils.setSheet(sheetName, workbook, ExportMonitorDTO.class);
+            Sheet sheet = ExcelExportUtils.setSheet(sheetName, workbook, MonitorDTO.class);
             // set cell style
             CellStyle cellStyle = ExcelExportUtils.setCellStyle(workbook);
 

@@ -29,13 +29,10 @@ import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hertzbeat.common.constants.CommonConstants;
 import org.apache.hertzbeat.common.entity.manager.Monitor;
 import org.apache.hertzbeat.common.entity.manager.Param;
 import org.apache.hertzbeat.common.entity.manager.Tag;
@@ -145,13 +142,10 @@ public abstract class AbstractImExportServiceImpl implements ImExportService {
             // 优先使用tagBindings数据
             List<Tag> tags = exportMonitor.monitor.getTagBindings();
             if (CollectionUtils.isEmpty(tags)) {
-                // 回退到原有标签ID处理
-                tags = tagService.listTag(new HashSet<>(exportMonitor.monitor.tags))
-                                 .stream()
-                                 .filter(tag -> !(tag.getName().equals(CommonConstants.TAG_MONITOR_ID) || tag.getName().equals(CommonConstants.TAG_MONITOR_NAME)))
-                                 .collect(Collectors.toList());
+                monitor.setTags(Collections.emptyList());
+            } else {
+                monitor.setTags(tags);
             }
-            monitor.setTags(tags);
         }
         monitorDto.setMonitor(monitor);
         if (exportMonitor.getMonitor() != null) {
