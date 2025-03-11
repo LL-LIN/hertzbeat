@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -176,6 +177,7 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
                     // 设置新标签的类型和ID
                     tag.setType((byte) 1);
                     tag.setId(null);
+                    tag.setColor(generateLowSaturationColor());
                     newTags.add(tag);
                 }
             }
@@ -195,6 +197,60 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
 
 
         return monitor;
+    }
+
+    // 生成低饱和度颜色的方法
+    private String generateLowSaturationColor() {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        int hue = random.nextInt(361);       // 色相: 0-360
+        int saturation = 10 + random.nextInt(21); // 饱和度: 10%-30%
+        int lightness = 50 + random.nextInt(21);  // 亮度: 50%-70%
+        return hslToRgb(hue, saturation, lightness);
+    }
+
+    // HSL转RGB的算法实现
+    private String hslToRgb(float h, float s, float l) {
+        s /= 100.0f;
+        l /= 100.0f;
+
+        float c = (1 - Math.abs(2 * l - 1)) * s;
+        float x = c * (1 - Math.abs((h / 60) % 2 - 1));
+        float m = l - c / 2;
+        float r;
+        float g;
+        float b;
+        if (h < 60) {
+            r = c;
+            g = x;
+            b = 0;
+        } else if (h < 120) {
+            r = x;
+            g = c;
+            b = 0;
+        } else if (h < 180) {
+            r = 0;
+            g = c;
+            b = x;
+        } else if (h < 240) {
+            r = 0;
+            g = x;
+            b = c;
+        } else if (h < 300) {
+            r = x;
+            g = 0;
+            b = c;
+        } else {
+            r = c;
+            g = 0;
+            b = x;
+        }
+
+        // 将RGB分量调整到0-255范围并转换为十六进制
+        r = Math.round((r + m) * 255);
+        g = Math.round((g + m) * 255);
+        b = Math.round((b + m) * 255);
+
+        return String.format("#%02x%02x%02x", (int) r, (int) g, (int) b);
     }
 
     private List<Tag> parseTagString(String input) {
@@ -226,8 +282,8 @@ public class ExcelImExportServiceImpl extends AbstractImExportServiceImpl{
                 if (StringUtils.isBlank(tag.getName())) {
                     throw new IllegalArgumentException("Tag name cannot be empty");
                 }
-                if (tag.getTagValue() == null) {
-                    tag.setTagValue(""); // 保证非null
+                if (StringUtils.equals(tag.getTagValue(), "")) {
+                    tag.setTagValue(null);
                 }
             });
 
