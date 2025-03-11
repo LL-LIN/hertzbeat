@@ -172,6 +172,9 @@ public abstract class AbstractImExportServiceImpl implements ImExportService {
         return "hertzbeat_monitor_" + LocalDate.now();
     }
 
+    /**
+     *
+     */
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -187,6 +190,9 @@ public abstract class AbstractImExportServiceImpl implements ImExportService {
         private Boolean detected;
     }
 
+    /**
+     *
+     */
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -215,6 +221,9 @@ public abstract class AbstractImExportServiceImpl implements ImExportService {
         private List<Tag> tagBindings = new ArrayList<>();
     }
 
+    /**
+     *
+     */
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
