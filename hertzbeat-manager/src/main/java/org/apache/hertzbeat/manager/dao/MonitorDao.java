@@ -80,6 +80,6 @@ public interface MonitorDao extends JpaRepository<Monitor, Long>, JpaSpecificati
      * @param status  Monitor Status
      */
     @Modifying(clearAutomatically = true)
-    @Query("update Monitor set status = :status where id = :id")
+    @Query("update Monitor set status = :status, gmtUpdate = CURRENT_TIMESTAMP where id = :id")
     void updateMonitorStatus(@Param(value = "id") Long id, @Param(value = "status") byte status);
 }

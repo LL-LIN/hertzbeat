@@ -51,7 +51,9 @@ import org.apache.hertzbeat.common.entity.manager.Monitor;
 import org.apache.hertzbeat.common.entity.manager.TagItem;
 import org.apache.hertzbeat.common.entity.message.CollectRep;
 import org.apache.hertzbeat.common.queue.CommonDataQueue;
+import org.apache.hertzbeat.common.support.SpringContextHolder;
 import org.apache.hertzbeat.common.support.event.MonitorDeletedEvent;
+import org.apache.hertzbeat.common.support.event.MonitorStatusChangeEvent;
 import org.apache.hertzbeat.common.support.event.SystemConfigChangeEvent;
 import org.apache.hertzbeat.common.util.CommonUtil;
 import org.apache.hertzbeat.common.util.JexlExpressionRunner;
@@ -69,7 +71,7 @@ import org.springframework.util.CollectionUtils;
 public class CalculateAlarm {
 
     private static final String SYSTEM_VALUE_ROW_COUNT = "system_value_row_count";
-    
+
     private static final int CALCULATE_THREADS = 3;
 
     /**
@@ -148,6 +150,11 @@ public class CalculateAlarm {
         // the highest severity alarm is generated to monitor the status change
         if (metricsData.getPriority() == 0) {
             handlerAvailableMetrics(monitorId, app, metricsData);
+        } else {
+            if (metricsData.getCode() == CollectRep.Code.SUCCESS) {
+                // Publish monitor status change event instead of directly calling MonitorService
+                SpringContextHolder.getApplicationContext().publishEvent(new MonitorStatusChangeEvent(this, metricsData.getId(), (byte) 1));
+            }
         }
         // Query the alarm definitions associated with the metrics of the monitoring type
         // field - define[]

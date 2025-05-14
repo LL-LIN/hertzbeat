@@ -56,6 +56,7 @@ import org.apache.hertzbeat.common.entity.manager.ParamDefine;
 import org.apache.hertzbeat.common.entity.manager.Tag;
 import org.apache.hertzbeat.common.entity.message.CollectRep;
 import org.apache.hertzbeat.common.support.event.MonitorDeletedEvent;
+import org.apache.hertzbeat.common.support.event.MonitorStatusChangeEvent;
 import org.apache.hertzbeat.common.util.AesUtil;
 import org.apache.hertzbeat.common.util.FileUtil;
 import org.apache.hertzbeat.common.util.IntervalExpressionUtil;
@@ -81,12 +82,14 @@ import org.apache.hertzbeat.manager.support.exception.MonitorMetricsException;
 import org.apache.hertzbeat.warehouse.service.WarehouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -901,6 +904,16 @@ public class MonitorServiceImpl implements MonitorService {
     @Override
     public void updateMonitorStatus(Long monitorId, byte status) {
         monitorDao.updateMonitorStatus(monitorId, status);
+    }
+
+    /**
+     * MonitorStatusChangeEvent
+     * @param event Monitor Status Change Event
+     */
+    @Async
+    @EventListener(MonitorStatusChangeEvent.class)
+    public void updateMonitorStatusByEvent(MonitorStatusChangeEvent event) {
+        monitorDao.updateMonitorStatus(event.getMonitorId(), event.getStatus());
     }
 
     @Override
