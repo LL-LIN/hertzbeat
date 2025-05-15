@@ -10,12 +10,6 @@ import { CONSTANTS } from '../../shared/constants';
   selector: 'layout-basic',
   template: `
     <layout-default [options]="options" [nav]="navTpl" [content]="contentTpl" [customError]="null">
-      <layout-default-header-item direction="left">
-        <a layout-default-header-item-trigger href="//github.com/apache/hertzbeat" target="_blank">
-          <i nz-icon nzType="github"></i>
-        </a>
-      </layout-default-header-item>
-
       <layout-default-header-item direction="left" hidden="pc">
         <div layout-default-header-item-trigger (click)="searchToggleStatus = !searchToggleStatus">
           <i nz-icon nzType="search"></i>
@@ -78,8 +72,8 @@ import { CONSTANTS } from '../../shared/constants';
 })
 export class LayoutBasicComponent {
   options: LayoutDefaultOptions = {
-    logoExpanded: `./assets/brand_white.svg`,
-    logoCollapsed: `./assets/logo.svg`
+    logoExpanded: `./assets/brand.png`,
+    logoCollapsed: `./assets/brand.png`
   };
   avatar: string = `./assets/img/avatar.svg`;
   searchToggleStatus = false;
