@@ -65,16 +65,18 @@ import org.springframework.stereotype.Component;
 public class GreptimeDbDataStorage extends AbstractHistoryDataStorage {
     
     private static final String CONSTANT_DB_TTL = "30d";
+
+    private static final String QUERY_HISTORY_SQL =
+        "SELECT CAST(ts AS Int64) AS ts_int, instance, `%s` " + "FROM hertzbeat.`%s` " + "WHERE ts >= now() - interval %s AND monitor_id = %s " + "ORDER BY ts DESC;";
+
+    @SuppressWarnings("checkstyle:LineLength")
+    private static final String QUERY_HISTORY_WITH_INSTANCE_SQL =
+        "SELECT CAST(ts AS Int64) AS ts_int, instance, `%s` " + "FROM hertzbeat.`%s` " + "WHERE ts >= now() - interval %s AND monitor_id = %s AND instance = '%s' " + "ORDER BY ts DESC;";
     
-    private static final String QUERY_HISTORY_SQL = "SELECT CAST (ts AS Int64) ts, instance, `%s` FROM `%s` WHERE ts >= now() -  interval '%s' and monitor_id = %s order by ts desc;";
+    private static final String QUERY_INSTANCE_SQL = "SELECT DISTINCT instance FROM `%s` WHERE ts >= now() - interval 1 WEEK";
     
     @SuppressWarnings("checkstyle:LineLength")
-    private static final String QUERY_HISTORY_WITH_INSTANCE_SQL = "SELECT CAST (ts AS Int64) ts, instance, `%s` FROM `%s` WHERE ts >= now() - interval '%s' and monitor_id = %s and instance = '%s' order by ts desc;";
-    
-    private static final String QUERY_INSTANCE_SQL = "SELECT DISTINCT instance FROM `%s` WHERE ts >= now() - interval '1 WEEK'";
-    
-    @SuppressWarnings("checkstyle:LineLength")
-    private static final String QUERY_HISTORY_INTERVAL_WITH_INSTANCE_SQL = "SELECT CAST (ts AS Int64) ts, first_value(`%s`) range '4h' first, avg(`%s`) range '4h' avg, min(`%s`) range '4h' min, max(`%s`) range '4h' max FROM `%s` WHERE instance = '%s' AND ts >= now() - interval '%s' ALIGN '4h'";
+    private static final String QUERY_HISTORY_INTERVAL_WITH_INSTANCE_SQL = "SELECT CAST (ts AS Int64) ts, first_value(`%s`) range '4h' first, avg(`%s`) range '4h' avg, min(`%s`) range '4h' min, max(`%s`) range '4h' max FROM hertzbeat.`%s` WHERE instance = '%s' AND ts >= now() - interval %s ALIGN '4h'";
     
     private static final String TABLE_NOT_EXIST = "not found";
     
@@ -385,7 +387,6 @@ public class GreptimeDbDataStorage extends AbstractHistoryDataStorage {
                             .build();
                     values.add(value);
                 }
-                resultSet.close();
             } catch (Exception e) {
                 if (log.isErrorEnabled()) {
                     log.error("[warehouse greptime] failed to getHistoryIntervalMetricData: {}", e.getMessage(), e);
@@ -399,17 +400,26 @@ public class GreptimeDbDataStorage extends AbstractHistoryDataStorage {
     // https://github.com/GreptimeTeam/greptimedb/issues/4168 is fixed.
     // default 6h-6 hours: s-seconds, M-minutes, h-hours, d-days, w-weeks
     private String history2interval(String history) {
-        if (history == null) {
-            return null;
+        if (history == null || history.isEmpty()) {
+            return "6 hour"; // 注意：不带引号，供拼接
         }
         history = history.trim().toLowerCase();
-        
-        // Be careful, the order matters.
-        return history.replaceAll("d", " day") //
-                .replaceAll("s", " second") //
-                .replaceAll("w", " week") //
-                .replaceAll("h", " hour")//
-                .replaceAll("m", " minute");
+
+        if (history.matches("\\d+d")) {
+            return history.replace("d", " day");
+        } else if (history.matches("\\d+h")) {
+            return history.replace("h", " hour");
+        } else if (history.matches("\\d+w")) {
+            return history.replace("w", " week");
+        } else if (history.matches("\\d+m")) {
+            return history.replace("m", " minute");
+        } else if (history.matches("\\d+s")) {
+            return history.replace("s", " second");
+        } else if (history.matches("\\d+")) {
+            return history + " second";
+        } else {
+            return "6 hour";
+        }
     }
     
     private String double2decimalString(double d) {
